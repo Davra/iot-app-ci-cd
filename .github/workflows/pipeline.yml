@@ -89,7 +89,7 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DAVRA_CRED")
           PREV_IMAGE=$(echo "$SERVICE_CONFIG" | jq '.[0].config.dockerImage')
-          echo "PREVIOUS_IMAGE='$PREV_IMAGE'" >> "$GITHUB_ENV"
+          echo "PREVIOUS_IMAGE=$PREV_IMAGE" >> "$GITHUB_ENV"
           
           curl -X PATCH "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
             -H "Content-Type: application/json" \
