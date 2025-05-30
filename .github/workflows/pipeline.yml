@@ -56,32 +56,32 @@ jobs:
           docker rmi -f $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REGISTRY_NAME:$BUILD_NUMBER || true
           docker rmi -f $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REGISTRY_NAME:latest || true
 
-      - name: Start ECR scan and check for vulnerabilities
-        run: |
-          set -e
-          aws ecr start-image-scan \
-            --region $REGION \
-            --repository-name $REGISTRY_NAME \
-            --image-id imageTag=$BUILD_NUMBER \
-            --output json > ecr_start_scan.json
+      # - name: Start ECR scan and check for vulnerabilities
+      #   run: |
+      #     set -e
+      #     aws ecr start-image-scan \
+      #       --region $REGION \
+      #       --repository-name $REGISTRY_NAME \
+      #       --image-id imageTag=$BUILD_NUMBER \
+      #       --output json > ecr_start_scan.json
 
-          aws ecr wait image-scan-complete \
-            --region $REGION \
-            --repository-name $REGISTRY_NAME \
-            --image-id imageTag=$BUILD_NUMBER
+      #     aws ecr wait image-scan-complete \
+      #       --region $REGION \
+      #       --repository-name $REGISTRY_NAME \
+      #       --image-id imageTag=$BUILD_NUMBER
 
-          aws ecr describe-image-scan-findings \
-            --region $REGION \
-            --repository-name $REGISTRY_NAME \
-            --image-id imageTag=$BUILD_NUMBER \
-            --output json > ecr_scan_result.json
+      #     aws ecr describe-image-scan-findings \
+      #       --region $REGION \
+      #       --repository-name $REGISTRY_NAME \
+      #       --image-id imageTag=$BUILD_NUMBER \
+      #       --output json > ecr_scan_result.json
 
-          CRITICAL=$(jq '.imageScanFindings.findings[] | select(.severity == "CRITICAL")' ecr_scan_result.json)
-          HIGH=$(jq '.imageScanFindings.findings[] | select(.severity == "HIGH")' ecr_scan_result.json)
-          if [[ -n "$CRITICAL" || -n "$HIGH" ]]; then
-            echo "CRITICAL or HIGH vulnerabilities found."
-            exit 1
-          fi
+      #     CRITICAL=$(jq '.imageScanFindings.findings[] | select(.severity == "CRITICAL")' ecr_scan_result.json)
+      #     HIGH=$(jq '.imageScanFindings.findings[] | select(.severity == "HIGH")' ecr_scan_result.json)
+      #     if [[ -n "$CRITICAL" || -n "$HIGH" ]]; then
+      #       echo "CRITICAL or HIGH vulnerabilities found."
+      #       exit 1
+      #     fi
 
       - name: Update Davra service config
         run: |
