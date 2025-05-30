@@ -88,7 +88,7 @@ jobs:
           SERVICE_CONFIG=$(curl "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DAVRA_CRED")
-          PREVIOUS_IMAGE=$(echo "$SERVICE_CONFIG" | | jq '.config.dockerImage')
+          PREVIOUS_IMAGE=$(echo "$SERVICE_CONFIG" | jq '.config.dockerImage')
           
           curl -X PATCH "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
             -H "Content-Type: application/json" \
