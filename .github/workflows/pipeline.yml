@@ -85,6 +85,11 @@ jobs:
 
       - name: Update Davra service config
         run: |
+          SERVICE_CONFIG=$(curl "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $DAVRA_CRED")
+          PREVIOUS_IMAGE=$(echo "$SERVICE_CONFIG" | | jq '.config.dockerImage')
+          
           curl -X PATCH "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DAVRA_CRED" \
@@ -111,7 +116,14 @@ jobs:
             fi
 
             if [[ $i -eq 10 ]]; then
-              echo "Container failed to run in time."
+              echo "Container failed to run in time. Rolling back to previous image."
+              curl -X PATCH "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer $DAVRA_CRED" \
+                -d '{
+                  "config.dockerImage": "'$PREVIOUS_IMAGE'",
+                  "config.dockerRegistrySecret": "'$SECRET'"
+                }'
               exit 1
             fi
           done
