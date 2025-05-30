@@ -88,7 +88,8 @@ jobs:
           SERVICE_CONFIG=$(curl "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DAVRA_CRED")
-          PREVIOUS_IMAGE=$(echo "$SERVICE_CONFIG" | jq '.[0].config.dockerImage')
+          PREV_IMAGE=$(echo "$SERVICE_CONFIG" | jq '.[0].config.dockerImage')
+          echo "PREVIOUS_IMAGE='$PREV_IMAGE'" >> "$GITHUB_ENV"
           
           curl -X PATCH "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}" \
             -H "Content-Type: application/json" \
@@ -101,7 +102,7 @@ jobs:
       - name: Wait for Davra container to run
         run: |
           for i in {1..10}; do
-            sleep 120
+            sleep 10
             RESPONSE=$(curl -s -H "Authorization: Bearer $DAVRA_CRED" \
               "https://${TENANTID}.davra.com/api/v1/serviceadmin/${SERVICE}/status")
 
@@ -121,7 +122,7 @@ jobs:
                 -H "Content-Type: application/json" \
                 -H "Authorization: Bearer $DAVRA_CRED" \
                 -d '{
-                  "config.dockerImage": "'$PREVIOUS_IMAGE'",
+                  "config.dockerImage": "'${{ env.PREVIOUS_IMAGE }}'",
                   "config.dockerRegistrySecret": "'$SECRET'"
                 }'
               exit 1
